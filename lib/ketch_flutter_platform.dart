@@ -13,7 +13,7 @@ class KetchFlutterPlatform extends PlatformInterface
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel(METHOD_CHANNEL_NAME);
-  final eventChannel = EventChannel(EVENT_CHANNEL_NAME);
+  final eventChannel = const EventChannel(EVENT_CHANNEL_NAME);
 
   static final Object _token = Object();
 
@@ -32,6 +32,10 @@ class KetchFlutterPlatform extends PlatformInterface
   static set instance(KetchFlutterPlatform instance) {
     PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
+  }
+
+  Stream<dynamic> getEventStream() {
+    return eventChannel.receiveBroadcastStream();
   }
 
   @override
@@ -85,7 +89,7 @@ class KetchFlutterPlatform extends PlatformInterface
   }
 
   @override
-  Future<void> cancel({String? id, String? tag}) {
+  Future<void> cancel({int? id, String? tag}) {
     return methodChannel.invokeMethod(METHOD_CANCEL, {"id": id, "tag": tag});
   }
 
@@ -95,7 +99,7 @@ class KetchFlutterPlatform extends PlatformInterface
   }
 
   @override
-  Future<void> pause({String? id, String? tag}) {
+  Future<void> pause({int? id, String? tag}) {
     return methodChannel.invokeMethod(METHOD_PAUSE, {"id": id, "tag": tag});
   }
 
@@ -105,7 +109,7 @@ class KetchFlutterPlatform extends PlatformInterface
   }
 
   @override
-  Future<void> resume({String? id, String? tag}) {
+  Future<void> resume({int? id, String? tag}) {
     return methodChannel.invokeMethod(METHOD_RESUME, {"id": id, "tag": tag});
   }
 
@@ -115,7 +119,7 @@ class KetchFlutterPlatform extends PlatformInterface
   }
 
   @override
-  Future<void> retry({String? id, String? tag}) {
+  Future<void> retry({int? id, String? tag}) {
     return methodChannel.invokeMethod(METHOD_RETRY, {"id": id, "tag": tag});
   }
 
@@ -132,7 +136,7 @@ class KetchFlutterPlatform extends PlatformInterface
   }
 
   @override
-  Future<void> clearDb({String? id, String? tag, bool deleteFile = true}) {
+  Future<void> clearDb({int? id, String? tag, bool deleteFile = true}) {
     return methodChannel.invokeMethod(METHOD_CLEAR_ALL_DB, {
       "id": id,
       "tag": tag,
@@ -142,7 +146,7 @@ class KetchFlutterPlatform extends PlatformInterface
 
   @override
   Future<List<dynamic>?> getDownloadModels({
-    String? id,
+    int? id,
     String? tag,
     String? status,
     List<String>? ids,

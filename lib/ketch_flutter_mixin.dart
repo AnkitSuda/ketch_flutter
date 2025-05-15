@@ -18,28 +18,28 @@ mixin KetchFlutterPlatformMixin {
     bool supportPauseResume = true,
   });
 
-  Future<void> cancel({String? id, String? tag});
+  Future<void> cancel({int? id, String? tag});
 
   Future<void> cancelAll();
 
-  Future<void> pause({String? id, String? tag});
+  Future<void> pause({int? id, String? tag});
 
   Future<void> pauseAll();
 
-  Future<void> resume({String? id, String? tag});
+  Future<void> resume({int? id, String? tag});
 
   Future<void> resumeAll();
 
-  Future<void> retry({String? id, String? tag});
+  Future<void> retry({int? id, String? tag});
 
   Future<void> retryAll();
 
   Future<void> clearAllDb({bool deleteFile = true});
 
-  Future<void> clearDb({String? id, String? tag, bool deleteFile = true});
+  Future<void> clearDb({int? id, String? tag, bool deleteFile = true});
 
   Future<List<dynamic>?> getDownloadModels({
-    String? id,
+    int? id,
     String? tag,
     String? status,
     List<String>? ids,

@@ -1,11 +1,13 @@
 package com.ankitsuda.ketch_flutter
 
 import android.content.Context
+import android.util.Log
 import com.ketch.DownloadConfig
 import com.ketch.Ketch
 import com.ketch.NotificationConfig
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.EventChannel.StreamHandler
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -16,9 +18,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** KetchFlutterPlugin */
-class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler {
+class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler, StreamHandler {
     /// The MethodChannel that will the communication between Flutter and native Android
     ///
     /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -36,8 +39,8 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler {
         context = flutterPluginBinding.applicationContext
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, METHOD_CHANNEL_NAME)
         channel.setMethodCallHandler(this)
-
         eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, EVENT_CHANNEL_NAME)
+        eventChannel.setStreamHandler(this)
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -81,9 +84,16 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler {
         channel.setMethodCallHandler(null)
     }
 
+    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        eventSink = events
+    }
+
+    override fun onCancel(arguments: Any?) {
+        eventSink = null
+    }
+
     private fun handleSetup(call: MethodCall, result: Result) {
         if (ketch != null) {
-            result.error("ALREADY_INITIALIZED", "Setup is already called", null)
             return
         }
 
@@ -125,18 +135,9 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler {
 
         ketch = Ketch.builder()
             .setDownloadConfig(downloadConfig)
-            .setNotificationConfig(notificationConfig)
+            .enableLogs(call.argument<Boolean>("enableLogs") ?: false)
+//            .setNotificationConfig(notificationConfig)
             .build(context)
-
-        eventChannel.setStreamHandler(object : EventChannel.StreamHandler {
-            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                eventSink = events
-            }
-
-            override fun onCancel(arguments: Any?) {
-                eventSink = null
-            }
-        })
 
         observeDownloads()
     }
@@ -146,7 +147,12 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler {
             ketch?.observeDownloads()
                 ?.flowOn(Dispatchers.IO)
                 ?.collect { items ->
-                    eventSink?.success(items)
+                    val mapList = items.map {
+                        it.toMap()
+                    }
+
+                    Log.d("DADAS", (eventSink == null).toString())
+                    eventSink?.success(mapList)
                 }
         }
     }
@@ -450,13 +456,14 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler {
         }
 
         if (item != null) {
-            result.success(listOf(items))
+            result.success(listOf(item.toMap()))
         } else if (items != null) {
-            result.success(items)
+            result.success(items.map { it?.toMap() })
         } else {
             result.error("NOT_FOUND", "Items not found", null)
         }
     }
+
 }
 
 fun Result.errorKetchNull() {
