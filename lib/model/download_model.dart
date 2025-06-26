@@ -48,6 +48,8 @@ class DownloadModel extends Equatable {
 
   /// Failure reason for failed download
   final String failureReason;
+  final String? customNotificationTitle;
+  final int? stopReason;
 
   const DownloadModel({
     required this.url,
@@ -65,6 +67,8 @@ class DownloadModel extends Equatable {
     required this.eTag,
     required this.metaData,
     required this.failureReason,
+    required this.stopReason,
+    required this.customNotificationTitle,
   });
 
   factory DownloadModel.fromMap(Map<dynamic, dynamic> map) {
@@ -84,6 +88,8 @@ class DownloadModel extends Equatable {
       eTag: map['eTag'],
       metaData: map['metaData'],
       failureReason: map['failureReason'],
+      customNotificationTitle: map['customNotificationTitle'],
+      stopReason: map['stopReason'],
     );
   }
 
@@ -104,5 +110,7 @@ class DownloadModel extends Equatable {
     eTag,
     metaData,
     failureReason,
+    customNotificationTitle,
+    stopReason,
   ];
 }

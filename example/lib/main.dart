@@ -53,6 +53,7 @@ class _MyAppState extends State<MyApp> {
               onPressed: _startTestDownload,
               child: Text("Start test download"),
             ),
+            OutlinedButton(onPressed: _clearDb, child: Text("Clear db")),
             ..._downloadModels.map(
               (model) => ListTile(
                 title: Text(model.fileName),
@@ -106,9 +107,14 @@ class _MyAppState extends State<MyApp> {
     _ketch.download(
       // url: "https://sample-files.com/downloads/documents/txt/simple.txt",
       // url: "https://ash-speed.hetzner.com/100MB.bin",
-      url: "https://testfile.org/1.3GBiconpng",
+      // url: "https://testfile.org/1.3GBiconpng",
+      url: "https://video-cdn-1.tarungrover.in/rec-283608/mp4/360p.mp4",
       path: (await getApplicationDocumentsDirectory()).path,
-      fileName: "${DateTime.now().millisecondsSinceEpoch}.bin",
+      fileName: "${DateTime.now().millisecondsSinceEpoch}.mp4",
     );
+  }
+
+  Future _clearDb() async {
+    await _ketch.clearDb();
   }
 }

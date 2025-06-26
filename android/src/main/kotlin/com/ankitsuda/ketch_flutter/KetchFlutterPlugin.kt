@@ -1,7 +1,7 @@
 package com.ankitsuda.ketch_flutter
 
+import android.R
 import android.content.Context
-import android.util.Log
 import com.ketch.DownloadConfig
 import com.ketch.Ketch
 import com.ketch.NotificationConfig
@@ -18,7 +18,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+
 
 /** KetchFlutterPlugin */
 class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler, StreamHandler {
@@ -111,7 +112,7 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler, StreamHandler {
             call.argument<Map<String, Any>>("notificationConfig") ?: mapOf()
 
 
-        val smallIcon = notificationConfigMap["smallIcon"] as Int?
+        val smallIcon = notificationConfigMap["smallIcon"] as String?
 
         if (smallIcon == null) {
             result.error("INVALID_ARGUMENTS", "notificationConfigSmallIcon is required", null)
@@ -127,16 +128,25 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler, StreamHandler {
                 ?: DEFAULT_VALUE_NOTIFICATION_CHANNEL_DESCRIPTION,
             importance = (notificationConfigMap["importance"] as Int?)
                 ?: DEFAULT_VALUE_NOTIFICATION_CHANNEL_IMPORTANCE,
-            showSpeed = (notificationConfigMap["show"] as Boolean?) ?: true,
-            showSize = (notificationConfigMap["show"] as Boolean?) ?: true,
-            showTime = (notificationConfigMap["show"] as Boolean?) ?: true,
-            smallIcon = smallIcon,
+            showSpeed = (notificationConfigMap["showSpeed"] as Boolean?) ?: true,
+            showSize = (notificationConfigMap["showSize"] as Boolean?) ?: true,
+            showTime = (notificationConfigMap["showTime"] as Boolean?) ?: true,
+            showButtons = (notificationConfigMap["showButtons"] as Boolean?) ?: true,
+            smallIcon = context.resIdByName(smallIcon, "drawable"),
         )
 
         ketch = Ketch.builder()
             .setDownloadConfig(downloadConfig)
             .enableLogs(call.argument<Boolean>("enableLogs") ?: false)
-//            .setNotificationConfig(notificationConfig)
+            .setNotificationConfig(notificationConfig)
+            .setOkHttpClient(
+                okHttpClient = OkHttpClient
+                    .Builder()
+                    .connectTimeout(downloadConfig.connectTimeOutInMs, java.util.concurrent.TimeUnit.MILLISECONDS)
+                    .readTimeout(downloadConfig.readTimeOutInMs, java.util.concurrent.TimeUnit.MILLISECONDS)
+                    .retryOnConnectionFailure(true)
+                    .build()
+            )
             .build(context)
 
         observeDownloads()
@@ -151,7 +161,6 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler, StreamHandler {
                         it.toMap()
                     }
 
-                    Log.d("DADAS", (eventSink == null).toString())
                     eventSink?.success(mapList)
                 }
         }
@@ -171,6 +180,7 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler, StreamHandler {
         val metaData = call.argument<String>("metaData")
         val headers = call.argument<Map<String, String>>("headers")
         val supportPauseResume = call.argument<Boolean>("supportPauseResume") == true
+        val customNotificationTitle = call.argument<String>("customNotificationTitle")
 
         if (url == null || path == null || fileName == null) {
             result.error("INVALID_ARGUMENTS", "Invalid arguments", null)
@@ -187,6 +197,7 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler, StreamHandler {
                 metaData = metaData ?: "",
                 headers = headersHashMap,
                 supportPauseResume = supportPauseResume,
+                customNotificationTitle = customNotificationTitle,
             )
         } else {
             ketch?.download(
@@ -197,6 +208,7 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler, StreamHandler {
                 metaData = metaData ?: "",
                 headers = headersHashMap,
                 supportPauseResume = supportPauseResume,
+                customNotificationTitle = customNotificationTitle,
             )
         }
 
@@ -302,12 +314,14 @@ class KetchFlutterPlugin : FlutterPlugin, MethodCallHandler, StreamHandler {
             return
         }
 
+        val customNotificationTitle = call.argument<String>("customNotificationTitle")
+
         if (id != null) {
-            ketch?.resume(id = id)
+            ketch?.resume(id = id, customNotificationTitle = customNotificationTitle)
         }
 
         if (tag != null) {
-            ketch?.resume(tag = tag)
+            ketch?.resume(tag = tag, customNotificationTitle = customNotificationTitle)
         }
 
         result.success(null)

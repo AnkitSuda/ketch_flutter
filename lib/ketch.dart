@@ -40,6 +40,7 @@ class KetchFlutter implements PlatformInterface {
     String metaData = "",
     Map<String, String> headers = const {},
     bool supportPauseResume = true,
+    String? customNotificationTitle,
   }) => KetchFlutterPlatform.instance.download(
     url: url,
     path: path,
@@ -48,6 +49,7 @@ class KetchFlutter implements PlatformInterface {
     metaData: metaData,
     headers: headers,
     supportPauseResume: supportPauseResume,
+    customNotificationTitle: customNotificationTitle,
   );
 
   Future<List<DownloadModel>> getDownloadModels({
@@ -83,8 +85,15 @@ class KetchFlutter implements PlatformInterface {
 
   Future<void> pauseAll() => KetchFlutterPlatform.instance.pauseAll();
 
-  Future<void> resume({int? id, String? tag}) =>
-      KetchFlutterPlatform.instance.resume(id: id, tag: tag);
+  Future<void> resume({
+    int? id,
+    String? tag,
+    String? customNotificationTitle,
+  }) => KetchFlutterPlatform.instance.resume(
+    id: id,
+    tag: tag,
+    customNotificationTitle: customNotificationTitle,
+  );
 
   Future<void> resumeAll() => KetchFlutterPlatform.instance.resumeAll();
 

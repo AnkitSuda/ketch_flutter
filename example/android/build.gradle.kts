@@ -1,5 +1,8 @@
 allprojects {
     repositories {
+        maven {
+            url = uri("/Users/ankit/projects/Ketch-plus/local-maven-repo")
+        }
         google()
         mavenCentral()
         maven("https://jitpack.io")

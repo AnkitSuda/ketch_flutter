@@ -24,9 +24,10 @@ class NotificationConfig extends Equatable {
 
   /// Whether to show time in the notification
   final bool showTime;
+  final bool showButtons;
 
   /// Resource ID of the small icon shown in the notification
-  final int smallIcon;
+  final String smallIcon;
 
   const NotificationConfig({
     this.enabled = DEFAULT_VALUE_NOTIFICATION_ENABLED,
@@ -36,6 +37,7 @@ class NotificationConfig extends Equatable {
     this.showSpeed = true,
     this.showSize = true,
     this.showTime = true,
+    this.showButtons = true,
     required this.smallIcon,
   });
 
@@ -48,6 +50,7 @@ class NotificationConfig extends Equatable {
     showSpeed,
     showSize,
     showTime,
+    showButtons,
     smallIcon,
   ];
 }

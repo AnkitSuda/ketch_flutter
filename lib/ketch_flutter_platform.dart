@@ -46,7 +46,8 @@ class KetchFlutterPlatform extends PlatformInterface
   }) {
     final mDownloadConfig = downloadConfig ?? const DownloadConfig();
     final mNotificationConfig =
-        notificationConfig ?? const NotificationConfig(smallIcon: 0);
+        notificationConfig ??
+        const NotificationConfig(smallIcon: "ic_launcher");
 
     return methodChannel.invokeMethod(METHOD_SETUP, {
       "enableLogs": enableLogs,
@@ -62,6 +63,7 @@ class KetchFlutterPlatform extends PlatformInterface
         "showSpeed": mNotificationConfig.showSpeed,
         "showSize": mNotificationConfig.showSize,
         "showTime": mNotificationConfig.showTime,
+        "showButtons": mNotificationConfig.showButtons,
         "smallIcon": mNotificationConfig.smallIcon,
       },
     });
@@ -76,6 +78,7 @@ class KetchFlutterPlatform extends PlatformInterface
     String metaData = "",
     Map<String, String> headers = const {},
     bool supportPauseResume = true,
+    String? customNotificationTitle,
   }) {
     return methodChannel.invokeMethod<int>(METHOD_DOWNLOAD, {
       "url": url,
@@ -85,6 +88,7 @@ class KetchFlutterPlatform extends PlatformInterface
       "metaData": metaData,
       "headers": headers,
       "supportPauseResume": supportPauseResume,
+      "customNotificationTitle": customNotificationTitle,
     });
   }
 
@@ -109,8 +113,12 @@ class KetchFlutterPlatform extends PlatformInterface
   }
 
   @override
-  Future<void> resume({int? id, String? tag}) {
-    return methodChannel.invokeMethod(METHOD_RESUME, {"id": id, "tag": tag});
+  Future<void> resume({int? id, String? tag, String? customNotificationTitle}) {
+    return methodChannel.invokeMethod(METHOD_RESUME, {
+      "id": id,
+      "tag": tag,
+      "customNotificationTitle": customNotificationTitle,
+    });
   }
 
   @override
@@ -137,7 +145,7 @@ class KetchFlutterPlatform extends PlatformInterface
 
   @override
   Future<void> clearDb({int? id, String? tag, bool deleteFile = true}) {
-    return methodChannel.invokeMethod(METHOD_CLEAR_ALL_DB, {
+    return methodChannel.invokeMethod(METHOD_CLEAR_DB, {
       "id": id,
       "tag": tag,
       "deleteFile": deleteFile,

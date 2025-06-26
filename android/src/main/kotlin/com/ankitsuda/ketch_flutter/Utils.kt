@@ -1,5 +1,7 @@
 package com.ankitsuda.ketch_flutter
 
+import android.content.Context
+import android.content.res.Resources
 import com.ketch.Status
 import com.ketch.DownloadModel
 
@@ -55,4 +57,11 @@ fun DownloadModel.toMap(): Map<String, Any> {
         "metaData" to metaData,
         "failureReason" to failureReason,
     )
+}
+
+fun Context.resIdByName(resIdName: String?, resType: String): Int {
+    resIdName?.let {
+        return resources.getIdentifier(it, resType, packageName)
+    }
+    throw Resources.NotFoundException()
 }

@@ -16,6 +16,7 @@ mixin KetchFlutterPlatformMixin {
     String metaData = "",
     Map<String, String> headers = const {},
     bool supportPauseResume = true,
+    String? customNotificationTitle,
   });
 
   Future<void> cancel({int? id, String? tag});
